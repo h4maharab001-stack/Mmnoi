@@ -1,0 +1,695 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>RM Mining Premium</title>
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        :root {
+            --bg-dark: #010816;
+            --card-bg: #07152b;
+            --accent-blue: #007bff;
+            --neon-blue: #00f2ff;
+            --neon-green: #00e676;
+            --neon-purple: #aa00ff;
+            --text-white: #ffffff;
+            --text-gray: #7a8fa1;
+            --gradient-blue: linear-gradient(90deg, #0088ff, #00f2ff);
+            --gradient-green: linear-gradient(90deg, #00c853, #b2ff59);
+            --gradient-purple: linear-gradient(90deg, #aa00ff, #e040fb);
+        }
+
+        * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+        body {
+            margin: 0; padding: 0; background: var(--bg-dark);
+            color: var(--text-white); font-family: 'Inter', sans-serif;
+            overflow-x: hidden; min-height: 100vh;
+        }
+
+        .app-container { max-width: 500px; margin: 0 auto; padding: 15px 15px 100px; }
+
+        /* Header Style */
+        .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
+        .header-left { display: flex; align-items: center; gap: 10px; }
+        .logo-circle {
+            width: 45px; height: 45px; border-radius: 50%; border: 2px solid rgba(255,255,255,0.2);
+            display: flex; align-items: center; justify-content: center; font-weight: 900;
+            background: rgba(255,255,255,0.05); box-shadow: 0 0 15px rgba(0, 136, 255, 0.3);
+        }
+        .header-text h2 { margin: 0; font-size: 18px; letter-spacing: 1px; }
+        .header-text p { margin: 0; font-size: 10px; color: var(--text-gray); text-transform: capitalize; }
+        .bell-icon { font-size: 20px; position: relative; }
+        .bell-dot { width: 8px; height: 8px; background: #ff4d4d; border-radius: 50%; position: absolute; top: 0; right: 0; border: 2px solid var(--bg-dark); }
+
+        /* Card System */
+        .card { background: var(--card-bg); border-radius: 18px; padding: 15px; margin-bottom: 12px; border: 1px solid rgba(255,255,255,0.05); }
+        .row-flex { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+        .icon-box { width: 45px; height: 45px; border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 22px; background: rgba(0,0,0,0.2); }
+        .card-content { flex: 1; }
+        .card-content h4 { margin: 0; font-size: 15px; font-weight: 600; }
+        .card-content p { margin: 3px 0 0; font-size: 11px; color: var(--text-gray); }
+
+        /* Buttons */
+        .btn-main { border: none; padding: 10px 20px; border-radius: 12px; font-weight: 700; font-size: 13px; color: white; cursor: pointer; display: flex; align-items: center; gap: 8px; }
+        .btn-blue { background: var(--gradient-blue); }
+        .btn-green { background: var(--gradient-green); color: #000; }
+        .btn-purple { background: var(--gradient-purple); }
+        .btn-use { background: #1a237e; border: 1px solid var(--neon-blue); }
+
+        /* Mining Specifics */
+        .mining-badge { background: rgba(0,242,255,0.1); color: var(--neon-blue); padding: 5px 12px; border-radius: 20px; font-size: 11px; display: flex; align-items: center; gap: 5px; }
+        .dot-pulse { width: 6px; height: 6px; background: var(--neon-blue); border-radius: 50%; animation: pulse 1.5s infinite; }
+        @keyframes pulse { 0% { opacity: 1; } 50% { opacity: 0.3; } 100% { opacity: 1; } }
+        .progress-container { height: 6px; background: #000; border-radius: 10px; margin-top: 12px; overflow: hidden; }
+        .progress-bar { height: 100%; width: 0%; background: var(--gradient-blue); box-shadow: 0 0 10px var(--neon-blue); }
+
+        /* Wallet Specifics */
+        .wallet-hero { text-align: center; padding: 25px 0; }
+        .coin-icon { width: 75px; height: 75px; background: linear-gradient(135deg, #ffd700, #ff8c00); border-radius: 50%; margin: 0 auto 15px; display: flex; align-items: center; justify-content: center; font-size: 38px; color: #5d4037; box-shadow: 0 0 30px rgba(255, 215, 0, 0.2); }
+        .balance-title { font-size: 12px; color: var(--text-gray); text-transform: uppercase; margin-bottom: 8px; }
+        .balance-amount { font-size: 34px; font-weight: 800; margin-bottom: 5px; }
+        .balance-usd { color: var(--text-gray); font-size: 13px; }
+
+        .wallet-actions { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; margin-top: 20px; }
+        .action-item { text-align: center; }
+        .action-circle { width: 52px; height: 52px; border-radius: 50%; margin: 0 auto 8px; display: flex; align-items: center; justify-content: center; font-size: 20px; color: white; }
+        .action-item p { font-size: 11px; margin: 0; color: var(--text-gray); text-transform: capitalize; }
+
+        /* Task Specifics */
+        .reward-pill { color: #ff4d94; font-weight: 800; font-size: 13px; }
+
+        /* Bottom Nav */
+        .bottom-nav { position: fixed; bottom: 0; left: 50%; transform: translateX(-50%); width: 100%; max-width: 500px; background: #051025; border-top: 1px solid rgba(255,255,255,0.05); display: flex; justify-content: space-around; padding: 12px 0 calc(12px + env(safe-area-inset-bottom)); z-index: 1000; }
+        .nav-item { flex: 1; text-align: center; color: var(--text-gray); text-decoration: none; display: flex; flex-direction: column; align-items: center; gap: 4px; font-size: 10px; }
+        .nav-item i { font-size: 20px; }
+        .nav-item.active { color: var(--neon-blue); }
+
+        /* Profile Specifics */
+        .lvl-tag { background: var(--accent-blue); padding: 2px 12px; border-radius: 10px; font-size: 11px; font-weight: 700; margin-top: 5px; display: inline-block; }
+        .btn-logout { width: 100%; padding: 16px; border-radius: 15px; background: transparent; border: 1px solid #ff3d00; color: #ff3d00; font-weight: 700; margin-top: 25px; display: flex; align-items: center; justify-content: center; gap: 10px; }
+
+        .view { display: none; animation: slideIn 0.3s ease-out; }
+        .view.active { display: block; }
+        @keyframes slideIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+    </style>
+</head>
+<body>
+
+    <div class="app-container">
+        <!-- Persistent Header -->
+        <header class="header">
+            <div class="header-left">
+                <div class="logo-circle">RM</div>
+                <div class="header-text">
+                    <h2>RM</h2>
+                    <p>Mine Today, Build Tomorrow</p>
+                </div>
+            </div>
+            <div class="bell-icon">
+                <i class="far fa-bell"></i>
+                <div class="bell-dot"></div>
+            </div>
+        </header>
+
+        <!-- HOME -->
+        <section id="view-home" class="view active">
+            <div class="card">
+                <div class="row-flex">
+                    <div class="icon-box" style="color: var(--neon-blue); font-size: 28px;"><i class="fas fa-pickaxe"></i></div>
+                    <div class="card-content">
+                        <h4>Start Mining</h4>
+                        <p>Tap to start earning Tomorrow</p>
+                    </div>
+                    <button class="btn-main btn-blue" id="mining-btn" onclick="handleMiningAction()">
+                        <i class="fas fa-caret-right"></i> Start Mining
+                    </button>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="row-flex">
+                    <div class="icon-box" style="color: #ffd700;"><i class="far fa-clock"></i></div>
+                    <div class="card-content">
+                        <h4 id="timer">4:00:00</h4>
+                        <p>Mining Timer</p>
+                    </div>
+                    <div class="mining-badge">
+                        <div class="dot-pulse"></div> <span id="mining-status-text">Mining...</span>
+                    </div>
+                </div>
+                <div class="progress-container">
+                    <div class="progress-bar" id="progress-fill"></div>
+                </div>
+            </div>
+
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
+                <div class="card">
+                    <div class="row-flex" style="justify-content: flex-start;">
+                        <div class="icon-box" style="width: 35px; height: 35px; color: #ffd700; font-size: 18px;"><i class="fas fa-coins"></i></div>
+                        <div class="card-content">
+                            <p style="margin:0; font-size: 10px;">Current Reward</p>
+                            <h4 style="color: var(--neon-blue);">+0.250 RM</h4>
+                            <p style="margin:0; font-size: 8px;">(per hour)</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="card">
+                    <div class="row-flex" style="justify-content: flex-start;">
+                        <div class="icon-box" style="width: 35px; height: 35px; color: #ffd700; font-size: 18px;"><i class="fas fa-bolt"></i></div>
+                        <div class="card-content">
+                            <p style="margin:0; font-size: 10px;">Energy</p>
+                            <h4><span id="user-energy">100</span> / 100</h4>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="row-flex">
+                    <div class="icon-box" style="color: #e040fb;"><i class="fas fa-bolt"></i></div>
+                    <div class="card-content">
+                        <h4>Energy Boost</h4>
+                        <p id="boost-desc">+10 Energy</p>
+                    </div>
+                    <button class="btn-main btn-use" id="boost-btn" onclick="handleEnergyBoost()" style="padding: 8px 25px;">Use</button>
+                </div>
+            </div>
+
+            <div class="card" id="claim-card" style="border: 1px solid var(--neon-green); display: none;">
+                <div class="row-flex">
+                    <div class="icon-box" style="color: var(--neon-green);"><i class="fas fa-gift"></i></div>
+                    <div class="card-content">
+                        <h4 style="color: var(--neon-green);">Mining Complete!</h4>
+                        <p>Claim your reward</p>
+                    </div>
+                    <button class="btn-main btn-green" onclick="handleMiningAction()">Claim</button>
+                </div>
+            </div>
+
+            <div class="card" onclick="switchView('wallet')">
+                <div class="row-flex">
+                    <div class="icon-box" style="color: #ffd700;"><i class="fas fa-wallet"></i></div>
+                    <div class="card-content">
+                        <p style="margin:0; font-size: 11px;">Balance</p>
+                        <h4 id="home-balance">0.000 RM</h4>
+                    </div>
+                    <i class="fas fa-chevron-right" style="color: var(--text-gray)"></i>
+                </div>
+            </div>
+        </section>
+
+        <!-- WALLET -->
+        <section id="view-wallet" class="view">
+            <div class="wallet-hero">
+                <p class="balance-title">Total Balance</p>
+                <div class="coin-icon"><i class="fas fa-dollar-sign"></i></div>
+                <div class="balance-amount"><span id="wallet-balance">0.000</span> RM</div>
+                <div class="balance-usd">≈ $0.00 (Estimated)</div>
+            </div>
+
+            <div class="wallet-actions">
+                <div class="action-item"><div class="action-circle" style="background: #2e7d32;"><i class="fas fa-arrow-down"></i></div><p>Deposit</p></div>
+                <div class="action-item"><div class="action-circle" style="background: #1565c0;"><i class="fas fa-arrow-up"></i></div><p>Withdraw</p></div>
+                <div class="action-item"><div class="action-circle" style="background: #6a1b9a;"><i class="fas fa-exchange-alt"></i></div><p>Transfer</p></div>
+                <div class="action-item"><div class="action-circle" style="background: #ef6c00;"><i class="far fa-clock"></i></div><p>History</p></div>
+            </div>
+
+            <h3 style="margin: 25px 0 15px; font-size: 16px;">Wallet Details</h3>
+            <div class="card" style="padding: 5px 15px;">
+                <div class="row-flex" style="padding: 12px 0; border-bottom: 1px solid rgba(255,255,255,0.05);">
+                    <div style="display:flex; align-items:center; gap:12px;"><i class="fas fa-coins" style="color: #ffd700;"></i> <span>Mining Reward</span></div>
+                    <b style="color: #ffd700;" id="detail-mining">0.000 RM</b>
+                </div>
+                <div class="row-flex" style="padding: 12px 0; border-bottom: 1px solid rgba(255,255,255,0.05);">
+                    <div style="display:flex; align-items:center; gap:12px;"><i class="fas fa-users" style="color: #0088ff;"></i> <span>Referral Reward</span></div>
+                    <b style="color: #ffd700;" id="detail-referral">0.000 RM</b>
+                </div>
+                <div class="row-flex" style="padding: 12px 0; border-bottom: 1px solid rgba(255,255,255,0.05);">
+                    <div style="display:flex; align-items:center; gap:12px;"><i class="fas fa-file-alt" style="color: var(--neon-blue);"></i> <span>Task Reward</span></div>
+                    <b style="color: #ffd700;" id="detail-task">0.000 RM</b>
+                </div>
+                <div class="row-flex" style="padding: 12px 0; border-bottom: 1px solid rgba(255,255,255,0.05);">
+                    <div style="display:flex; align-items:center; gap:12px;"><i class="fas fa-piggy-bank" style="color: #ff4081;"></i> <span>Staking Reward</span></div>
+                    <b style="color: #ffd700;">0.000 RM</b>
+                </div>
+                <div class="row-flex" style="padding: 12px 0;">
+                    <div style="display:flex; align-items:center; gap:12px;"><i class="fas fa-wallet" style="color: var(--neon-green);"></i> <span>Total Balance</span></div>
+                    <b style="color: var(--neon-green);" id="detail-total">0.000 RM</b>
+                </div>
+            </div>
+        </section>
+
+        <!-- TASK -->
+        <section id="view-task" class="view">
+            <h2 style="margin: 0;">Tasks</h2>
+            <p class="header-text" style="color: var(--text-gray); margin-bottom: 25px; text-transform: none; font-size: 12px;">Complete tasks & earn more RM</p>
+            <div id="task-container">
+                <!-- Mining Power Task -->
+                <div class="card">
+                    <div class="row-flex">
+                        <div class="icon-box" style="background:rgba(170,0,255,0.1); color: #e040fb;"><i class="fas fa-crown"></i></div>
+                        <div class="card-content"><h4>Mining Power Bosst</h4><p>Increase your mining power</p></div>
+                        <div class="reward-pill">+50 RM</div>
+                        <i class="fas fa-chevron-right" style="color: var(--text-gray)"></i>
+                    </div>
+                </div>
+                <!-- Dynamic tasks will load here -->
+            </div>
+        </section>
+
+        <!-- REFER -->
+        <section id="view-refer" class="view">
+            <h2 style="margin: 0;">Refer & Earn</h2>
+            <p style="color: var(--text-gray); margin-bottom: 20px; font-size: 12px;">Invite your friends and get rewards</p>
+            <div class="card">
+                <div class="row-flex">
+                    <div class="icon-box" style="background:rgba(0,136,255,0.1); color: #0088ff;"><i class="fas fa-link"></i></div>
+                    <div class="card-content">
+                        <p style="margin:0; font-size: 11px;">Your Refer Link</p>
+                        <input type="text" id="ref-url" style="background:transparent; border:none; color:white; font-size:12px; width:100%;" value="loading..." readonly>
+                    </div>
+                    <button class="icon-box" style="width:40px; height:40px; color:white;" onclick="copyRef()"><i class="far fa-copy"></i></button>
+                </div>
+            </div>
+
+            <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; margin-bottom: 25px;">
+                <div class="card" style="text-align: center; border-color: var(--neon-green); padding: 10px;">
+                    <i class="fas fa-user-plus" style="color: var(--neon-green); font-size: 20px; margin-bottom: 5px;"></i>
+                    <p style="font-size: 8px; color: var(--neon-green);">REFER REWARD</p>
+                    <b style="color: var(--neon-green); font-size: 12px;">+10 RM</b>
+                    <p style="font-size: 7px; color: var(--text-gray);">(per member)</p>
+                </div>
+                <div class="card" style="text-align: center; border-color: var(--accent-blue); padding: 10px;">
+                    <i class="fas fa-users" style="color: var(--accent-blue); font-size: 20px; margin-bottom: 5px;"></i>
+                    <p style="font-size: 8px; color: var(--accent-blue);">TOTAL REFER</p>
+                    <b id="ref-count" style="font-size: 16px;">0</b>
+                </div>
+                <div class="card" style="text-align: center; border-color: var(--neon-purple); padding: 10px;">
+                    <i class="fas fa-user-friends" style="color: var(--neon-purple); font-size: 20px; margin-bottom: 5px;"></i>
+                    <p style="font-size: 8px; color: var(--neon-purple);">TOTAL MEMBER</p>
+                    <b id="ref-total" style="font-size: 16px;">0</b>
+                </div>
+            </div>
+
+            <h3 style="margin: 20px 0 15px; font-size: 16px;">Your Refer Member List</h3>
+            <div id="referral-list" class="card" style="text-align: center; padding: 40px 10px; color: var(--text-gray);">
+                <i class="fas fa-users" style="font-size: 40px; opacity: 0.1; margin-bottom: 10px;"></i>
+                <p style="margin: 0; font-size: 14px;">No members yet</p>
+                <p style="margin: 0; font-size: 11px;">Invite your friends to get rewards</p>
+            </div>
+        </section>
+
+        <!-- PROFILE -->
+        <section id="view-profile" class="view">
+            <div class="card" style="padding: 25px 15px;">
+                <div class="row-flex">
+                    <div class="logo-circle" style="width: 70px; height: 70px; font-size: 30px;">RM</div>
+                    <div class="card-content">
+                        <p style="margin:0; font-size: 11px; color: var(--text-gray);">User ID</p>
+                        <h2 id="prof-id" style="font-size: 24px;">RM123456</h2>
+                        <span class="lvl-tag">Level <span id="prof-lvl">1</span></span>
+                    </div>
+                    <i class="fas fa-chevron-right" style="color: var(--text-gray)"></i>
+                </div>
+            </div>
+
+            <div class="card" onclick="openSocial('COMMUNITY_URL')">
+                <div class="row-flex">
+                    <div class="icon-box" style="color: var(--accent-blue);"><i class="fas fa-users"></i></div>
+                    <div class="card-content"><h4>Community</h4><p>Join our community</p></div>
+                    <i class="fas fa-chevron-right" style="color: var(--text-gray)"></i>
+                </div>
+            </div>
+
+            <div class="card" onclick="openSocial('SUPPORT_URL')">
+                <div class="row-flex">
+                    <div class="icon-box" style="color: var(--neon-blue);"><i class="fas fa-headset"></i></div>
+                    <div class="card-content"><h4>Saport</h4><p>Get help & support</p></div>
+                    <i class="fas fa-chevron-right" style="color: var(--text-gray)"></i>
+                </div>
+            </div>
+
+            <button class="btn-logout" onclick="window.Telegram.WebApp.close()">
+                <i class="fas fa-sign-out-alt"></i> Logout
+            </button>
+        </section>
+
+        <!-- Bottom Nav -->
+        <nav class="bottom-nav">
+            <a href="#" class="nav-item active" onclick="switchView('home', this)"><i class="fas fa-home"></i><span>Home</span></a>
+            <a href="#" class="nav-item" onclick="switchView('wallet', this)"><i class="fas fa-wallet"></i><span>Wallet</span></a>
+            <a href="#" class="nav-item" onclick="switchView('task', this)"><i class="fas fa-tasks"></i><span>Task</span></a>
+            <a href="#" class="nav-item" onclick="switchView('refer', this)"><i class="fas fa-user-friends"></i><span>Refer</span></a>
+            <a href="#" class="nav-item" onclick="switchView('profile', this)"><i class="fas fa-user"></i><span>Profile</span></a>
+        </nav>
+    </div>
+
+    <script>
+        const tg = window.Telegram.WebApp;
+
+        // Dynamic API Base based on current port
+        const API_BASE = window.location.port === '5001' ? 'http://127.0.0.1:5000/api' : '/api';
+
+        let authToken = localStorage.getItem('rm_token');
+        let userData = null;
+        let miningSession = null;
+        let config = {};
+
+        tg.ready(); tg.expand();
+
+        async function init() {
+            try {
+                if (!authToken) await authenticate();
+                await loadData();
+                document.getElementById('prof-id').innerText = 'RM' + (userData ? userData.telegram_id : '000000');
+                setInterval(updateTimer, 1000);
+            } catch (err) {
+                console.error(err);
+                tg.showAlert("Initial load failed: " + err.message);
+            }
+        }
+
+        async function authenticate() {
+            if (!tg.initData) {
+                authToken = "dev_mode_token";
+                localStorage.setItem('rm_token', authToken);
+                return;
+            }
+            try {
+                const res = await fetch(`${API_BASE}/auth/telegram`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ init_data: tg.initData, start_param: tg.initDataUnsafe.start_param || '' })
+                });
+                const data = await res.json();
+                if (data.success) {
+                    authToken = data.token;
+                    localStorage.setItem('rm_token', authToken);
+                } else {
+                    throw new Error(data.message);
+                }
+            } catch (e) {
+                console.error("Auth failed:", e);
+                authToken = "dev_mode_token"; // Fallback for testing
+            }
+        }
+
+        async function apiReq(url, method = 'GET', body = null) {
+            const endpoint = url.startsWith('http') ? url : (API_BASE + url);
+            const res = await fetch(endpoint, {
+                method,
+                headers: {
+                    'Authorization': `Bearer ${authToken}`,
+                    'Content-Type': 'application/json'
+                },
+                body: body ? JSON.stringify(body) : null
+            });
+
+            if (res.status === 401) {
+                localStorage.removeItem('rm_token');
+                // Avoid infinite reload
+                if (authToken !== "dev_mode_token") window.location.reload();
+            }
+
+            const data = await res.json();
+            if (!res.ok) throw new Error(data.message || "Request failed");
+            return data;
+        }
+
+        async function loadData() {
+            try {
+                // Fetch basic info
+                const [me, mine] = await Promise.all([
+                    apiReq('/me'),
+                    apiReq('/mining/status')
+                ]);
+
+                if (me.success) {
+                    userData = me.user;
+                    updateUI();
+                }
+
+                if (mine.success) {
+                    miningSession = mine.session;
+                    updateMiningUI();
+                }
+
+                // Fetch config separately (non-blocking)
+                fetch(API_BASE + '/config').then(r => r.json()).then(conf => {
+                    if (conf.success) {
+                        config = conf;
+                        if (config.energy_boost_amount) {
+                            const desc = document.getElementById('boost-desc');
+                            if (desc) desc.innerText = `+${config.energy_boost_amount} Energy`;
+                        }
+                    }
+                }).catch(e => console.warn("Config load failed", e));
+
+            } catch (err) {
+                console.error("loadData failed:", err);
+                throw err;
+            }
+        }
+
+        function updateUI() {
+            if (!userData) return;
+            const balance = (userData.balance + userData.mining_balance).toFixed(3);
+            document.getElementById('home-balance').innerText = balance + ' RM';
+            document.getElementById('wallet-balance').innerText = balance;
+            document.getElementById('user-energy').innerText = Math.floor(userData.energy);
+            document.getElementById('prof-lvl').innerText = userData.level;
+            document.getElementById('prof-id').innerText = 'RM' + userData.telegram_id;
+        }
+
+        function updateMiningUI() {
+            const btn = document.getElementById('mining-btn');
+            const status = document.getElementById('mining-status-text');
+            const claim = document.getElementById('claim-card');
+
+            if (!miningSession) {
+                status.innerText = 'Ready';
+                btn.style.display = 'flex';
+                btn.disabled = false;
+                btn.innerHTML = '<i class="fas fa-caret-right"></i> Start Mining';
+                claim.style.display = 'none';
+                return;
+            }
+
+            const isDone = new Date() >= new Date(miningSession.end_time);
+            if (isDone) {
+                status.innerText = 'Completed';
+                btn.style.display = 'none';
+                claim.style.display = 'block';
+            } else {
+                status.innerText = 'Mining...';
+                btn.style.display = 'flex';
+                btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Mining Active';
+                btn.disabled = true;
+                claim.style.display = 'none';
+            }
+        }
+
+        function updateTimer() {
+            if (!miningSession) return;
+            const now = new Date();
+            const start = new Date(miningSession.start_time);
+            const end = new Date(miningSession.end_time);
+
+            if (now < end) {
+                const diff = Math.floor((end - now) / 1000);
+                document.getElementById('timer').innerText = formatTime(diff);
+                const pc = ((now - start) / (end - start)) * 100;
+                document.getElementById('progress-fill').style.width = pc + '%';
+            } else {
+                updateMiningUI();
+            }
+        }
+
+        function formatTime(s) {
+            const h = Math.floor(s / 3600);
+            const m = Math.floor((s % 3600) / 60);
+            const sec = s % 60;
+            return [h, m, sec].map(v => v < 10 ? "0" + v : v).join(":");
+        }
+
+        async function handleMiningAction() {
+            try {
+                if (!miningSession) {
+                    if (userData && userData.energy < 10) {
+                        tg.showAlert("Not enough energy! Energy recovers over time.");
+                        return;
+                    }
+                    const res = await apiReq('/mining/start', 'POST');
+                    if (res.success) {
+                        tg.HapticFeedback.impactOccurred('medium');
+                        await loadData();
+                    } else {
+                        tg.showAlert(res.message || "Failed to start mining.");
+                    }
+                } else {
+                    const res = await apiReq('/mining/claim', 'POST');
+                    if (res.success) {
+                        tg.HapticFeedback.notificationOccurred('success');
+                        tg.showAlert(`Reward Claimed! +${res.reward.toFixed(3)} RM`);
+                        await loadData();
+                    } else {
+                        tg.showAlert(res.message || "Failed to claim reward.");
+                    }
+                }
+            } catch (err) {
+                tg.showAlert("Request failed. Please try again.");
+            }
+        }
+
+        async function handleEnergyBoost() {
+            const btn = document.getElementById('boost-btn');
+            const adUrl = config.ad_block_id;
+
+            if (!adUrl) {
+                tg.showAlert("No Ad link configured in Admin Panel.");
+                return;
+            }
+
+            btn.disabled = true;
+            btn.innerText = "Loading...";
+
+            const confirmMsg = "Watch/Open this Ad to get energy boost?";
+
+            // Helper function to handle confirm in both Telegram and Browser
+            const runBoost = async () => {
+                // Open the Ad link
+                if (adUrl.startsWith('http')) {
+                    tg.openLink(adUrl);
+                } else {
+                    tg.showAlert("Invalid Ad link. Please provide a full URL in Admin Panel.");
+                    btn.disabled = false;
+                    btn.innerText = "Use";
+                    return;
+                }
+
+                try {
+                    const res = await apiReq('/energy/boost', 'POST');
+                    if (res.success) {
+                        tg.HapticFeedback.notificationOccurred('success');
+                        tg.showAlert(`Reward Claimed! +${config.energy_boost_amount || 10} Energy added.`);
+                        await loadData();
+                    } else {
+                        tg.showAlert(res.message || "Failed to boost energy.");
+                    }
+                } catch (e) {
+                    console.error(e);
+                    tg.showAlert("Server connection error.");
+                }
+                btn.disabled = false;
+                btn.innerText = "Use";
+            };
+
+            // Use native confirm if not in Telegram, else use tg.showConfirm
+            if (!tg.initData) {
+                if (window.confirm(confirmMsg)) {
+                    await runBoost();
+                } else {
+                    btn.disabled = false;
+                    btn.innerText = "Use";
+                }
+            } else {
+                tg.showConfirm(confirmMsg, async (ok) => {
+                    if (ok) {
+                        await runBoost();
+                    } else {
+                        btn.disabled = false;
+                        btn.innerText = "Use";
+                    }
+                });
+            }
+        }
+
+        function switchView(id, el) {
+            document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
+            document.getElementById('view-' + id).classList.add('active');
+            if (el) { document.querySelectorAll('.nav-item').forEach(t => t.classList.remove('active')); el.classList.add('active'); }
+            if (id === 'wallet') loadWalletDetails();
+            if (id === 'task') loadTasks();
+            if (id === 'refer') loadReferrals();
+        }
+
+        async function loadWalletDetails() {
+            const res = await apiReq('/balance');
+            if (res.success) {
+                const map = {}; res.rewards.forEach(r => map[r.type] = r.total);
+                document.getElementById('detail-mining').innerText = (map.mining || 0).toFixed(3) + ' RM';
+                document.getElementById('detail-referral').innerText = (map.referral || 0).toFixed(3) + ' RM';
+                document.getElementById('detail-task').innerText = (map.task || 0).toFixed(3) + ' RM';
+                document.getElementById('detail-total').innerText = (userData.balance + userData.mining_balance).toFixed(3) + ' RM';
+            }
+        }
+
+        async function loadTasks() {
+            const res = await apiReq('/tasks');
+            if (res.success) {
+                const container = document.getElementById('task-container');
+
+                // Static Mining Power Boost Card (Always first)
+                let html = `
+                    <div class="card" onclick="tg.showAlert('Mining power boosted!')">
+                        <div class="row-flex">
+                            <div class="icon-box" style="background:rgba(170,0,255,0.1); color: #e040fb;"><i class="fas fa-crown"></i></div>
+                            <div class="card-content"><h4>Mining Power Bosst</h4><p>Increase your mining power</p></div>
+                            <div class="reward-pill">+50 RM</div>
+                            <i class="fas fa-chevron-right" style="color: var(--text-gray)"></i>
+                        </div>
+                    </div>
+                `;
+
+                // Add dynamic tasks from server
+                html += res.tasks.map(t => `
+                    <div class="card" onclick="doTask(${t.id}, '${t.task_url}')">
+                        <div class="row-flex">
+                            <div class="icon-box" style="color: ${getTaskCol(t.task_type)}">${getTaskIco(t.task_type)}</div>
+                            <div class="card-content"><h4>${t.title}</h4><p>${t.description || 'Complete to earn'}</p></div>
+                            <div class="reward-pill">+${t.reward.toFixed(0)} RM</div>
+                            <i class="fas ${t.claimed_at ? 'fa-check-circle' : 'fa-chevron-right'}" style="color: ${t.claimed_at ? '#00e676' : 'var(--text-gray)'}"></i>
+                        </div>
+                    </div>
+                `).join('');
+
+                container.innerHTML = html;
+            }
+        }
+
+        function getTaskIco(type) {
+            return type === 'telegram' ? '<i class="fab fa-telegram"></i>' : (type === 'youtube' ? '<i class="fab fa-youtube"></i>' : '<i class="fas fa-tasks"></i>');
+        }
+        function getTaskCol(type) {
+            return type === 'telegram' ? '#0088ff' : (type === 'youtube' ? '#ff0000' : '#00f2ff');
+        }
+
+        async function doTask(id, url) { if (url) tg.openLink(url); await apiReq(`/tasks/${id}/verify`, 'POST'); await apiReq(`/tasks/${id}/claim`, 'POST'); loadTasks(); loadData(); }
+
+        async function loadReferrals() {
+            const res = await apiReq('/referrals');
+            if (res.success) {
+                document.getElementById('ref-url').value = `https://t.me/rm_bot?start=RM${userData.telegram_id}`;
+                document.getElementById('ref-count').innerText = res.members.length;
+                document.getElementById('ref-total').innerText = res.members.length;
+                if (res.members.length > 0) {
+                    document.getElementById('referral-list').innerHTML = res.members.map(m => `
+                        <div class="row-flex" style="padding: 10px 0; border-bottom: 1px solid rgba(255,255,255,0.05);">
+                            <div class="logo-circle" style="width: 35px; height: 35px; font-size: 14px;">${m.first_name[0]}</div>
+                            <div class="card-content" style="text-align:left"><h4>${m.first_name}</h4><p>Joined ${new Date(m.created_at).toLocaleDateString()}</p></div>
+                            <b style="color: var(--neon-green)">+10 RM</b>
+                        </div>
+                    `).join('');
+                }
+            }
+        }
+
+        function copyRef() { const input = document.getElementById('ref-url'); input.select(); document.execCommand('copy'); tg.showScanQrPopup({ text: 'Copied!' }); setTimeout(() => tg.closeScanQrPopup(), 1000); }
+        function openSocial(key) { const urls = { 'COMMUNITY_URL': 'https://t.me/rm_mining_community', 'SUPPORT_URL': 'https://t.me/rm_mining_support' }; tg.openTelegramLink(urls[key]); }
+
+        init();
+    </script>
+</body>
+</html>
